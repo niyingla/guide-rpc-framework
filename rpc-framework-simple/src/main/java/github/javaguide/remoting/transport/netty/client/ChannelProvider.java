@@ -22,9 +22,15 @@ public class ChannelProvider {
         channelMap = new ConcurrentHashMap<>();
     }
 
+    /**
+     * 通过地址信息 获取一个channel
+     * @param inetSocketAddress
+     * @return
+     */
     public Channel get(InetSocketAddress inetSocketAddress) {
         String key = inetSocketAddress.toString();
         // determine if there is a connection for the corresponding address
+        // key = hostname + ":" + port
         if (channelMap.containsKey(key)) {
             Channel channel = channelMap.get(key);
             // if so, determine if the connection is available, and if so, get it directly

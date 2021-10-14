@@ -24,6 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ZkServiceProviderImpl implements ServiceProvider {
 
 
+     //key service name value bean map
     /**
      * key: rpc service name(interface name + version + group)
      * value: service object
@@ -66,6 +67,10 @@ public class ZkServiceProviderImpl implements ServiceProvider {
         return service;
     }
 
+    /**
+     * 发布注册提供服务
+     * @param rpcServiceConfig rpc service related attributes
+     */
     @Override
     public void publishService(RpcServiceConfig rpcServiceConfig) {
         try {

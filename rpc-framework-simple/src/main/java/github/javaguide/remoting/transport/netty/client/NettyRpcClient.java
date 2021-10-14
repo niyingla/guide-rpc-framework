@@ -76,6 +76,8 @@ public final class NettyRpcClient implements RpcRequestTransport {
         this.channelProvider = SingletonFactory.getInstance(ChannelProvider.class);
     }
 
+
+    //根据地址 链接channel
     /**
      * connect server and get the channel ,so that you can send rpc message to server
      *
@@ -85,14 +87,18 @@ public final class NettyRpcClient implements RpcRequestTransport {
     @SneakyThrows
     public Channel doConnect(InetSocketAddress inetSocketAddress) {
         CompletableFuture<Channel> completableFuture = new CompletableFuture<>();
-        bootstrap.connect(inetSocketAddress).addListener((ChannelFutureListener) future -> {
+        bootstrap.connect(inetSocketAddress)
+            //添加完成后 事件监听
+            .addListener((ChannelFutureListener) future -> {
             if (future.isSuccess()) {
                 log.info("The client has connected [{}] successful!", inetSocketAddress.toString());
+                //返回响应channel
                 completableFuture.complete(future.channel());
             } else {
                 throw new IllegalStateException();
             }
         });
+        //获取channel
         return completableFuture.get();
     }
 
@@ -101,21 +107,28 @@ public final class NettyRpcClient implements RpcRequestTransport {
         // build return value
         CompletableFuture<RpcResponse<Object>> resultFuture = new CompletableFuture<>();
         // get server address
+        //根据服务名 负载获取一个地址
         InetSocketAddress inetSocketAddress = serviceDiscovery.lookupService(rpcRequest);
         // get  server address related channel
+        //通过地址拿到channel
         Channel channel = getChannel(inetSocketAddress);
         if (channel.isActive()) {
             // put unprocessed request
+            //写入结果请求集合
             unprocessedRequests.put(rpcRequest.getRequestId(), resultFuture);
+            //组装请求消息
             RpcMessage rpcMessage = RpcMessage.builder().data(rpcRequest)
                     .codec(SerializationTypeEnum.PROTOSTUFF.getCode())
                     .compress(CompressTypeEnum.GZIP.getCode())
                     .messageType(RpcConstants.REQUEST_TYPE).build();
-            channel.writeAndFlush(rpcMessage).addListener((ChannelFutureListener) future -> {
+            channel.writeAndFlush(rpcMessage)
+                // 添加事件完成监听
+                .addListener((ChannelFutureListener) future -> {
                 if (future.isSuccess()) {
                     log.info("client send message: [{}]", rpcMessage);
                 } else {
                     future.channel().close();
+                    //异步执行不正常的结束 告诉请求集合
                     resultFuture.completeExceptionally(future.cause());
                     log.error("Send failed:", future.cause());
                 }

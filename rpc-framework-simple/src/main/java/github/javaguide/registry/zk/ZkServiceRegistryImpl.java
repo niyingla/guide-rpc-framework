@@ -16,6 +16,11 @@ import java.net.InetSocketAddress;
 @Slf4j
 public class ZkServiceRegistryImpl implements ServiceRegistry {
 
+    /**
+     * 根据ip地址注册rpcServiceName到zk
+     * @param rpcServiceName    rpc service name
+     * @param inetSocketAddress service address
+     */
     @Override
     public void registerService(String rpcServiceName, InetSocketAddress inetSocketAddress) {
         String servicePath = CuratorUtils.ZK_REGISTER_ROOT_PATH + "/" + rpcServiceName + inetSocketAddress.toString();

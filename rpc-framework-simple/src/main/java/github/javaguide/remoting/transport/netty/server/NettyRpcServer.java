@@ -50,6 +50,7 @@ public class NettyRpcServer {
 
     @SneakyThrows
     public void start() {
+        //清除之前的zk 注册信息
         CustomShutdownHook.getCustomShutdownHook().clearAll();
         String host = InetAddress.getLocalHost().getHostAddress();
         EventLoopGroup bossGroup = new NioEventLoopGroup(1);
@@ -89,6 +90,7 @@ public class NettyRpcServer {
         } catch (InterruptedException e) {
             log.error("occur exception when start server:", e);
         } finally {
+            //关闭先线程组
             log.error("shutdown bossGroup and workerGroup");
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();

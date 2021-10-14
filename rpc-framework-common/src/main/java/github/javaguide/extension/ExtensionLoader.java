@@ -106,7 +106,8 @@ public final class ExtensionLoader<T> {
                 classes = cachedClasses.get();
                 if (classes == null) {
                     classes = new HashMap<>();
-                    // load all extensions from our extensions directory
+                    // l
+                    // oad all extensions from our extensions directory
                     loadDirectory(classes);
                     cachedClasses.set(classes);
                 }

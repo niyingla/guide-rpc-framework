@@ -20,7 +20,8 @@ import lombok.ToString;
 @ToString
 public class RpcMessage {
 
-    //rpc message type
+    //rpc message type 消息类型
+    // 1 请求 2 响应 3 ping 4 pong
     private byte messageType;
     //serialization type
     private byte codec;

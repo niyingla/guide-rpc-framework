@@ -43,8 +43,11 @@ public class NettyRpcServerHandler extends ChannelInboundHandlerAdapter {
                 log.info("server receive msg: [{}] ", msg);
                 byte messageType = ((RpcMessage) msg).getMessageType();
                 RpcMessage rpcMessage = new RpcMessage();
+                //序列化方式
                 rpcMessage.setCodec(SerializationTypeEnum.PROTOSTUFF.getCode());
+                //压缩方式
                 rpcMessage.setCompress(CompressTypeEnum.GZIP.getCode());
+                //判断消息类型 是否是ping pong 心跳
                 if (messageType == RpcConstants.HEARTBEAT_REQUEST_TYPE) {
                     rpcMessage.setMessageType(RpcConstants.HEARTBEAT_RESPONSE_TYPE);
                     rpcMessage.setData(RpcConstants.PONG);
@@ -53,8 +56,10 @@ public class NettyRpcServerHandler extends ChannelInboundHandlerAdapter {
                     // Execute the target method (the method the client needs to execute) and return the method result
                     Object result = rpcRequestHandler.handle(rpcRequest);
                     log.info(String.format("server get result: %s", result.toString()));
+                    //1 请求 2 响应 3 ping 4 pong
                     rpcMessage.setMessageType(RpcConstants.RESPONSE_TYPE);
                     if (ctx.channel().isActive() && ctx.channel().isWritable()) {
+                        //写入响应结果
                         RpcResponse<Object> rpcResponse = RpcResponse.success(result, rpcRequest.getRequestId());
                         rpcMessage.setData(rpcResponse);
                     } else {
@@ -63,14 +68,22 @@ public class NettyRpcServerHandler extends ChannelInboundHandlerAdapter {
                         log.error("not writable now, message dropped");
                     }
                 }
+                //响应
                 ctx.writeAndFlush(rpcMessage).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
             }
         } finally {
             //Ensure that ByteBuf is released, otherwise there may be memory leaks
+            //释放消息
             ReferenceCountUtil.release(msg);
         }
     }
 
+    /**
+     * 一段时间空闲 就会触发此方法检查
+     * @param ctx
+     * @param evt
+     * @throws Exception
+     */
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
         if (evt instanceof IdleStateEvent) {
@@ -84,6 +97,11 @@ public class NettyRpcServerHandler extends ChannelInboundHandlerAdapter {
         }
     }
 
+    /**
+     * 报错时
+     * @param ctx
+     * @param cause
+     */
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         log.error("server catch exception");

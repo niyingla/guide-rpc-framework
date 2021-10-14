@@ -25,10 +25,15 @@ public class RpcRequestHandler {
     }
 
     /**
+     * 执行rpc请求 并返回结果
+     */
+    /**
      * Processing rpcRequest: call the corresponding method, and then return the method
      */
     public Object handle(RpcRequest rpcRequest) {
+        //获取 目标bean
         Object service = serviceProvider.getService(rpcRequest.getRpcServiceName());
+        //执行目标方法
         return invokeTargetMethod(rpcRequest, service);
     }
 
@@ -42,6 +47,7 @@ public class RpcRequestHandler {
     private Object invokeTargetMethod(RpcRequest rpcRequest, Object service) {
         Object result;
         try {
+            //反射执行
             Method method = service.getClass().getMethod(rpcRequest.getMethodName(), rpcRequest.getParamTypes());
             result = method.invoke(service, rpcRequest.getParameters());
             log.info("service:[{}] successful invoke method:[{}]", rpcRequest.getInterfaceName(), rpcRequest.getMethodName());

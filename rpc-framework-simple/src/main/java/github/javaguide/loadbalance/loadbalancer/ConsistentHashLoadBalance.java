@@ -14,6 +14,9 @@ import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ *
+ * 一致性哈希 负载均衡
+ *
  * refer to dubbo consistent hash load balance: https://github.com/apache/dubbo/blob/2d9583adf26a2d8bd6fb646243a9fe80a77e65d5/dubbo-cluster/src/main/java/org/apache/dubbo/rpc/cluster/loadbalance/ConsistentHashLoadBalance.java
  *
  * @author RicardoZ
@@ -75,13 +78,21 @@ public class ConsistentHashLoadBalance extends AbstractLoadBalance {
         }
 
         public String select(String rpcServiceKey) {
+            //根据key 算md5
             byte[] digest = md5(rpcServiceKey);
+            //md5 算hash
             return selectForKey(hash(digest, 0));
         }
 
-        public String selectForKey(long hashCode) {
-            Map.Entry<Long, String> entry = virtualInvokers.tailMap(hashCode, true).firstEntry();
 
+        /**
+         * 根据hashCode 获取一个结果
+         * @param hashCode
+         * @return
+         */
+        public String selectForKey(long hashCode) {
+            //获取一个子集。其所有对象的 key 的值大于等于 fromKey
+            Map.Entry<Long, String> entry = virtualInvokers.tailMap(hashCode, true).firstEntry();
             if (entry == null) {
                 entry = virtualInvokers.firstEntry();
             }

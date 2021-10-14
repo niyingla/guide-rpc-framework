@@ -21,9 +21,12 @@ public final class SingletonFactory {
             throw new IllegalArgumentException();
         }
         String key = c.toString();
+        //判断工厂中是否已经存在此对象
         if (OBJECT_MAP.containsKey(key)) {
+            //强转返回
             return c.cast(OBJECT_MAP.get(key));
         } else {
+            //不存在通过newInstance 创建一个
             return c.cast(OBJECT_MAP.computeIfAbsent(key, k -> {
                 try {
                     return c.getDeclaredConstructor().newInstance();

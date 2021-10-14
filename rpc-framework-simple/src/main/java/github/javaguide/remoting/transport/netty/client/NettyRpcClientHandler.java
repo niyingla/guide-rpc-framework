@@ -39,6 +39,7 @@ public class NettyRpcClientHandler extends ChannelInboundHandlerAdapter {
     }
 
     /**
+     * 接受结果响应handler
      * Read the message transmitted by the server
      */
     @Override
@@ -52,6 +53,7 @@ public class NettyRpcClientHandler extends ChannelInboundHandlerAdapter {
                     log.info("heart [{}]", tmp.getData());
                 } else if (messageType == RpcConstants.RESPONSE_TYPE) {
                     RpcResponse<Object> rpcResponse = (RpcResponse<Object>) tmp.getData();
+                    //完成结果响应
                     unprocessedRequests.complete(rpcResponse);
                 }
             }

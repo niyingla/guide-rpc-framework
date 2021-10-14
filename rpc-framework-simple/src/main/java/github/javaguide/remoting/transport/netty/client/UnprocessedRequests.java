@@ -7,6 +7,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * 结果响应结合
  * unprocessed requests by the server.
  *
  * @author shuang.kou

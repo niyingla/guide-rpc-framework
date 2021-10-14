@@ -49,6 +49,7 @@ public class RpcClientProxy implements InvocationHandler {
     }
 
     /**
+     * 生产代理类
      * get the proxy object
      */
     @SuppressWarnings("unchecked")
@@ -57,6 +58,7 @@ public class RpcClientProxy implements InvocationHandler {
     }
 
     /**
+     * 执行 rpc 代理类方法
      * This method is actually called when you use a proxy object to call a method.
      * The proxy object is the object you get through the getProxy method.
      */
@@ -75,10 +77,12 @@ public class RpcClientProxy implements InvocationHandler {
                 .build();
         RpcResponse<Object> rpcResponse = null;
         if (rpcRequestTransport instanceof NettyRpcClient) {
+            //同步等待请求响应
             CompletableFuture<RpcResponse<Object>> completableFuture = (CompletableFuture<RpcResponse<Object>>) rpcRequestTransport.sendRpcRequest(rpcRequest);
             rpcResponse = completableFuture.get();
         }
         if (rpcRequestTransport instanceof SocketRpcClient) {
+            //直接返回 结果了
             rpcResponse = (RpcResponse<Object>) rpcRequestTransport.sendRpcRequest(rpcRequest);
         }
         this.check(rpcResponse, rpcRequest);
