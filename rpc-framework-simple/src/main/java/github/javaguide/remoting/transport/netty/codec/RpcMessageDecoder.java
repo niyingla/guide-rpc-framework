@@ -86,6 +86,11 @@ public class RpcMessageDecoder extends LengthFieldBasedFrameDecoder {
     }
 
 
+    /**
+     * ByteBuf 缓冲字节容器 有三个下标 读取时 读下标会后移
+     * @param in
+     * @return
+     */
     private Object decodeFrame(ByteBuf in) {
         // note: must read ByteBuf in order
         checkMagicNumber(in);
@@ -108,20 +113,25 @@ public class RpcMessageDecoder extends LengthFieldBasedFrameDecoder {
             rpcMessage.setData(RpcConstants.PONG);
             return rpcMessage;
         }
+        //剩余内容长度 = 总长度 - 头信息长度
         int bodyLength = fullLength - RpcConstants.HEAD_LENGTH;
         if (bodyLength > 0) {
             byte[] bs = new byte[bodyLength];
             in.readBytes(bs);
             // decompress the bytes
+            //获取对应压缩方式
             String compressName = CompressTypeEnum.getName(compressType);
             Compress compress = ExtensionLoader.getExtensionLoader(Compress.class)
                     .getExtension(compressName);
+            //进行解压
             bs = compress.decompress(bs);
             // deserialize the object
+            //获取序列化方式
             String codecName = SerializationTypeEnum.getName(rpcMessage.getCodec());
             log.info("codec name: [{}] ", codecName);
             Serializer serializer = ExtensionLoader.getExtensionLoader(Serializer.class)
                     .getExtension(codecName);
+            //反序列化内容并获取对应的请求、响应对象
             if (messageType == RpcConstants.REQUEST_TYPE) {
                 RpcRequest tmpValue = serializer.deserialize(bs, RpcRequest.class);
                 rpcMessage.setData(tmpValue);
@@ -142,6 +152,10 @@ public class RpcMessageDecoder extends LengthFieldBasedFrameDecoder {
         }
     }
 
+    /**
+     * 固定开头 编码
+     * @param in
+     */
     private void checkMagicNumber(ByteBuf in) {
         // read the first 4 bit, which is the magic number, and compare
         int len = RpcConstants.MAGIC_NUMBER.length;
