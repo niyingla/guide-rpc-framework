@@ -29,7 +29,9 @@ public class ZkServiceProviderImpl implements ServiceProvider {
      * value: service object
      */
     private final Map<String, Object> serviceMap;
-    //服务注册实现
+    /**
+     * 服务注册实现
+     */
     private final ServiceRegistry serviceRegistry;
 
     public ZkServiceProviderImpl() {
