@@ -13,7 +13,6 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -30,14 +29,11 @@ public class ZkServiceProviderImpl implements ServiceProvider {
      * value: service object
      */
     private final Map<String, Object> serviceMap;
-    //已注册服务名 集合
-    private final Set<String> registeredService;
     //服务注册实现
     private final ServiceRegistry serviceRegistry;
 
     public ZkServiceProviderImpl() {
         serviceMap = new ConcurrentHashMap<>();
-        registeredService = ConcurrentHashMap.newKeySet();
         //注册器实现类
         serviceRegistry = ExtensionLoader.getExtensionLoader(ServiceRegistry.class).getExtension("zk");
     }
@@ -49,10 +45,9 @@ public class ZkServiceProviderImpl implements ServiceProvider {
     @Override
     public void addService(RpcServiceConfig rpcServiceConfig) {
         String rpcServiceName = rpcServiceConfig.getRpcServiceName();
-        if (registeredService.contains(rpcServiceName)) {
+        if (serviceMap.keySet().contains(rpcServiceName)) {
             return;
         }
-        registeredService.add(rpcServiceName);
         //放到服务对象集合
         serviceMap.put(rpcServiceName, rpcServiceConfig.getService());
         log.info("Add service: {} and interfaces:{}", rpcServiceName, rpcServiceConfig.getService().getClass().getInterfaces());
