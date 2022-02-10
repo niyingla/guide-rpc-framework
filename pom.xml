@@ -29,6 +29,8 @@
     <modules>
         <module>rpc-framework-simple</module>
         <module>rpc-framework-common</module>
+        <module>example-server</module>
+        <module>hello-service-api</module>
     </modules>
     <dependencies>
         <!-- lombok -->
