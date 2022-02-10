@@ -12,6 +12,8 @@ import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.StandardAnnotationMetadata;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
+
 /**
  * scan and filter specified annotations
  *
@@ -30,10 +32,16 @@ public class CustomScannerRegistrar implements ImportBeanDefinitionRegistrar, Re
 
     }
 
+    /**
+     * 注册beanDefinition方法
+     * @param annotationMetadata 当前@import下的注解信息
+     * @param beanDefinitionRegistry beanDefinition注册器
+     */
     @Override
     public void registerBeanDefinitions(AnnotationMetadata annotationMetadata, BeanDefinitionRegistry beanDefinitionRegistry) {
         //get the attributes and values ​​of RpcScan annotation
-        AnnotationAttributes rpcScanAnnotationAttributes = AnnotationAttributes.fromMap(annotationMetadata.getAnnotationAttributes(RpcScan.class.getName()));
+        Map<String, Object> annotationAttributes = annotationMetadata.getAnnotationAttributes(RpcScan.class.getName());
+        AnnotationAttributes rpcScanAnnotationAttributes = AnnotationAttributes.fromMap(annotationAttributes);
         String[] rpcScanBasePackages = new String[0];
         if (rpcScanAnnotationAttributes != null) {
             // get the value of the basePackage property
