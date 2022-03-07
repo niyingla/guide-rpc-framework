@@ -49,7 +49,7 @@ public class RpcMessageEncoder extends MessageToByteEncoder<RpcMessage> {
         try {
             out.writeBytes(RpcConstants.MAGIC_NUMBER);
             out.writeByte(RpcConstants.VERSION);
-            // leave a place to write the value of full length
+            // leave a place to write the value of full length 留个地方写全长的值
             out.writerIndex(out.writerIndex() + 4);
             byte messageType = rpcMessage.getMessageType();
             out.writeByte(messageType);
@@ -58,6 +58,7 @@ public class RpcMessageEncoder extends MessageToByteEncoder<RpcMessage> {
             out.writeInt(ATOMIC_INTEGER.getAndIncrement());
             // build full length
             byte[] bodyBytes = null;
+            //头信息长度 16
             int fullLength = RpcConstants.HEAD_LENGTH;
             // if messageType is not heartbeat message,fullLength = head length + body length
             if (messageType != RpcConstants.HEARTBEAT_REQUEST_TYPE
@@ -73,6 +74,7 @@ public class RpcMessageEncoder extends MessageToByteEncoder<RpcMessage> {
                 Compress compress = ExtensionLoader.getExtensionLoader(Compress.class)
                         .getExtension(compressName);
                 bodyBytes = compress.compress(bodyBytes);
+                //头信息长度 + 内容长度 = 总长度
                 fullLength += bodyBytes.length;
             }
 
@@ -80,8 +82,11 @@ public class RpcMessageEncoder extends MessageToByteEncoder<RpcMessage> {
                 out.writeBytes(bodyBytes);
             }
             int writeIndex = out.writerIndex();
+            //当前写入位置 - 总数据长度 + 4位（魔法数）+ 1位（版本）= 总长度 位置
             out.writerIndex(writeIndex - fullLength + RpcConstants.MAGIC_NUMBER.length + 1);
+            //吸入总长度
             out.writeInt(fullLength);
+            //设置此缓冲区的 写位置
             out.writerIndex(writeIndex);
         } catch (Exception e) {
             log.error("Encode request error!", e);
